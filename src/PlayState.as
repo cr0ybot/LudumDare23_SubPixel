@@ -12,8 +12,11 @@ package
 	
 	public class PlayState extends FlxState
 	{
+		[Embed(source = "../assets/cursor.png")] private var cursor:Class;
+		
+		
 		private var level:Level;
-		private var launcher:Launcher;
+		//private var launcher:Launcher;
 		//private var spgrid:SPGrid;
 		
 		public function PlayState() 
@@ -23,7 +26,10 @@ package
 		
 		override public function create():void
 		{
-			FlxG.bgColor = 0xff333333;
+			//FlxG.mouse.hide;
+			FlxG.mouse.load(cursor, 2, -8, -8);
+			
+			FlxG.bgColor = 0xff000000;
 			
 			/*
 			var perlinData:BitmapData = new BitmapData(32, 32);
@@ -40,11 +46,11 @@ package
 			add(spgrid);
 			*/
 			
-			level = new Level(3, 3);
+			level = new Level(1);
 			add(level);
 			
-			launcher = new Launcher(Launcher.POSITION_LEFT);
-			add(launcher);
+			//launcher = new Launcher(level.grid, Launcher.POSITION_LEFT);
+			//add(launcher);
 		}
 		
 		override public function update():void

@@ -6,7 +6,6 @@ package
 	 */
 	
 	import org.flixel.*;
-	import be.boulevart.google.*;
 	
 	public class MenuState extends FlxState
 	{

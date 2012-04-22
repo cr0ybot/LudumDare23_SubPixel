@@ -34,6 +34,30 @@ package
 		}
 		
 		/**
+		 * Moves subpixel in direction dictated by launcher position
+		 * @param	Value		Absolute value of movement (positive number) in subpixel cell units; 1 will move subpixel 1 subpixel over, horizontally or vertically.
+		 * @param	Position	Position value, provided by Launcher.position
+		 */
+		public function move(Value:uint, Position:uint):void
+		{
+			switch(Position)
+			{
+				case Launcher.POSITION_BOTTOM:
+					y -= Value * PIXEL_SIZE;
+					break;
+				case Launcher.POSITION_LEFT:
+					x += Value * SUBPIX_W;
+					break;
+				case Launcher.POSITION_TOP:
+					y += Value * PIXEL_SIZE;
+					break;
+				case Launcher.POSITION_RIGHT:
+					x -= Value * SUBPIX_W;
+					break;
+			}
+		}
+		
+		/**
 		 * 
 		 * @param	Ignore	Ignore value. Will choose any color BUT this one.
 		 * @return	Returns a color as uint

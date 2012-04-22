@@ -14,10 +14,13 @@ package
 		public static const POSITION_TOP:uint = 0x10;
 		public static const POSITION_RIGHT:uint = 0x11;
 		
-		private var position:uint;
+		private var grid:GameGrid;
+		public var position:uint;
+		public var loadPosition:FlxPoint;
 		
-		public function Launcher(Position:uint):void
+		public function Launcher(Grid:GameGrid, Position:uint):void
 		{
+			grid = Grid;
 			position = Position;
 			trace(position.toString(16));
 			var X:int, Y:int;
@@ -44,46 +47,44 @@ package
 			}
 			
 			super(X, Y);
-			//x = X;
-			//y = Y;
 			trace(x + ":" + y);
 			
-			/*
-			loadRotatedGraphic(launcherPNG, 4);
-			
-			addAnimation("bottom", [0], 0, false);
-			addAnimation("left", [1], 0, false);
-			addAnimation("top", [2], 0, false);
-			addAnimation("right", [3], 0, false);
-			
-			updateRotation();
-			*/
-			
 			loadGraphic(launcherPNG, true, false, 24, 24, true);
-			//origin.x = 12;
-			//origin.y = 12;
 			
 			addAnimation("bottom", [0], 0, false);
 			addAnimation("left", [1], 0, false);
 			addAnimation("top", [2], 0, false);
 			addAnimation("right", [3], 0, false);
 			
-			updatePosition();
+			loadPosition = new FlxPoint();
+			
+			//updatePosition();
 		}
 		
 		override public function update():void
 		{
 			super.update();
 			
-			if (FlxG.keys.UP) position = POSITION_TOP;
-			if (FlxG.keys.RIGHT) position = POSITION_RIGHT;
-			if (FlxG.keys.DOWN) position = POSITION_BOTTOM;
-			if (FlxG.keys.LEFT) position = POSITION_LEFT;
-			
-			updatePosition();
+			//updatePosition();
 		}
 		
-		private function updatePosition():void
+		private function snapX():void
+		{
+			//if (x >= grid.width + grid.x) x = grid.width + grid.x - 1;
+			//if (x < grid.x) x = grid.x;
+			if (x >= grid.spBounds.x + grid.spBounds.width) x = grid.spBounds.x + grid.spBounds.width;
+			if (x < grid.spBounds.x) x = grid.spBounds.x;
+			x = x - ((x - grid.x) % SubPixel.SUBPIX_W) - SubPixel.SUBPIX_W - 3;
+		}
+		private function snapY():void
+		{
+			//if (y > grid.height) y -= SubPixel.PIXEL_SIZE;
+			if (y >= grid.spBounds.y + grid.spBounds.height) y = grid.spBounds.y + grid.spBounds.height;
+			if (y < grid.spBounds.y) y = grid.spBounds.y;
+			y = y - ((y - grid.y) % SubPixel.PIXEL_SIZE) - 3;
+		}
+		
+		public function updatePosition():void
 		{
 			/*
 			while (position > 3) position -= 4;
@@ -94,23 +95,55 @@ package
 			{
 				case POSITION_LEFT:
 					x = 0;
-					y = FlxG.height / 2 - 12;
+					//y = FlxG.height / 2 - 12;
+					y = FlxG.mouse.y;
+					snapY();
+					loadPosition.x = x + 6;
+					loadPosition.y = y + 3;
+					if (!grid.highlightH.visible) grid.highlightH.visible = true;
+					if (grid.highlightV.visible) grid.highlightV.visible = false;
+					grid.highlightH.x = loadPosition.x;
+					grid.highlightH.y = loadPosition.y;
 					play("left");
 					break;
 				case POSITION_TOP:
-					x = FlxG.width / 2 - 12;
+					//x = FlxG.width / 2 - 12;
+					x = FlxG.mouse.x;
 					y = 0;
+					snapX();
+					loadPosition.x = x + 9;
+					loadPosition.y = y + 6;
+					if (grid.highlightH.visible) grid.highlightH.visible = false;
+					if (!grid.highlightV.visible) grid.highlightV.visible = true;
+					grid.highlightV.x = loadPosition.x;
+					grid.highlightV.y = loadPosition.y;
 					play("top");
 					break;
 				case POSITION_RIGHT:
 					x = FlxG.width - 24;
-					y = FlxG.height / 2 - 12;
+					//y = FlxG.height / 2 - 12;
+					y = FlxG.mouse.y;
+					snapY();
+					loadPosition.x = x + 12;
+					loadPosition.y = y + 3;
+					if (!grid.highlightH.visible) grid.highlightH.visible = true;
+					if (grid.highlightV.visible) grid.highlightV.visible = false;
+					grid.highlightH.x = 6;
+					grid.highlightH.y = loadPosition.y;
 					play("right");
 					break;
 				default:
 				case POSITION_BOTTOM:
-					x = FlxG.width / 2 - 12;
+					//x = FlxG.width / 2 - 12;
+					x = FlxG.mouse.x;
 					y = FlxG.height - 24;
+					snapX();
+					loadPosition.x = x + 9;
+					loadPosition.y = y;
+					if (grid.highlightH.visible) grid.highlightH.visible = false;
+					if (!grid.highlightV.visible) grid.highlightV.visible = true;
+					grid.highlightV.x = loadPosition.x;
+					grid.highlightV.y = 6;
 					play("bottom");
 					break;
 			}
