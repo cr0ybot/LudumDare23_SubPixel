@@ -195,16 +195,71 @@ package
 			// TODO: how the fuck do i check for matches?
 			// check rows? how do i get rows?
 			// use spBounds!?!?!?
-			/*
-			var boundsW:uint = (grid.spBounds.width + SubPixel.SUBPIX_W - 1) / SubPixel.SUBPIX_W;
-			var boundsH:uint = (grid.spBounds.height + SubPixel.PIXEL_SIZE - 1) / SubPixel.PIXEL_SIZE;
-			for (var j:uint = 0; j < boundsH; j += SubPixel.PIXEL_SIZE)
+			
+			//var boundsW:uint = (grid.spBounds.width + SubPixel.SUBPIX_W - 1) / SubPixel.SUBPIX_W;
+			//var boundsH:uint = (grid.spBounds.height + SubPixel.PIXEL_SIZE - 1) / SubPixel.PIXEL_SIZE;
+			
+			trace("--------------");
+			
+			var boundsH:uint = grid.spBounds.y + grid.spBounds.height;
+			for (var i:uint = grid.spBounds.y; i <= boundsH; i += SubPixel.PIXEL_SIZE)
 			{
+				var spRow:Vector.<SubPixel> = spList.filter(
+					function filterRow(item:SubPixel, index:int, vector:Vector.<SubPixel>):Boolean
+					{
+						if (item.y == i) return true;
+						else return false;
+					});
 				
+				trace("spRow length: " + spRow.length);
+				
+				if (spRow.length > 2)
+				{
+					// sort list so it's in order from left to right
+					spRow.sort(sortByX);
+					
+					for (var j:uint = 2; j < spRow.length; j++)
+					{
+						// if this group of three are all different colors...
+						if (spRow[j].color != spRow[j - 1].color && spRow[j].color != spRow[j - 2].color && spRow[j - 1].color != spRow[j - 2].color) // index out of range (144 / 12)
+						{
+							trace("different colors: " + (j - 2) + "-" + j);
+							
+							// if this group is also sequential/successive (no gaps)...
+							var conTest:Number = (spRow[j].x + SubPixel.SUBPIX_W) - spRow[j - 2].x;
+							trace("testing continuity, should be 18: " + conTest);
+							if (conTest == SubPixel.PIXEL_SIZE) // checking the total width to see if it matches the pixel size
+							{
+								trace("match!: " + (j - 2) + "-" + j);
+								
+								// we found a match! what do we do with it?
+								// delete them for now, maybe animate later
+								spRow.slice(j - 2, j + 1).forEach(removeFromSPList);
+								if (j < spRow.length - 3)
+								j += 2; // move j ahead so it isnt looking for subpixels we just destroyed
+							}
+						}
+					}
+				}
 			}
-			*/
 			
 			launched = false;
+		}
+		
+		private function removeFromSPList(SP:SubPixel, Index:int, vector:Vector.<SubPixel>):void
+		{
+			spList.some(
+				function removeIt(item:SubPixel, index:int, vector2:Vector.<SubPixel>):Boolean
+				{
+					if (item.x == SP.x && item.y == SP.y)
+					{
+						trace("removing subpixel at " + Index);
+						spList.splice(index, 1);
+						remove(item, true);
+						return true;
+					}
+					else return false;
+				});
 		}
 		
 		private function getCollisionRow():Vector.<SubPixel>
