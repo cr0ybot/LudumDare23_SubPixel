@@ -13,8 +13,6 @@ package
 	
 	public class SPGrid extends FlxGroup
 	{
-		public var playerX:int = 40;
-		public var playerY:int = 20;
 		public var x:int, y:int, width:uint, height:uint;
 		public var pixels:Vector.<Pixel>;
 		
@@ -34,8 +32,8 @@ package
 			width = BDATA.width * Pixel.PIXEL_SIZE;
 			height = BDATA.height * Pixel.PIXEL_SIZE;
 			trace("level: " + BDATA.width + "x" + BDATA.height);
-			x = (FlxG.stage.stageWidth / 2) - (width / 2);
-			y = (FlxG.stage.stageHeight / 2) - (height / 2);
+			x = (FlxG.width / 2) - (width / 2);
+			y = (FlxG.height / 2) - (height / 2);
 			//trace("stage: " + FlxG.stage.stageWidth + "x" + FlxG.stage.stageHeight);
 			//trace("pixelgrid: " + x + ":" + y + " " + width + "x" + height);
 			

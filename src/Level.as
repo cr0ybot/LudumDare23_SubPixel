@@ -12,7 +12,9 @@ package
 	
 	public class Level extends FlxGroup
 	{
-		public static const NEXT_NUM:uint = 4;
+		public static const NEXT_NUM:uint = 6;
+		
+		public var multiplier:uint = 1;
 		
 		public var spList:Vector.<SubPixel>;
 		public var grid:GameGrid;
@@ -21,13 +23,23 @@ package
 		public var currentSP:SubPixel;
 		public var spCollisionRow:Vector.<SubPixel>;
 		public var glow:FlxSprite;
-		//public var spBounds:Rectangle;
+		public var deck:Deck;
+		
+		/*
+		public var charge:FlxSound = FlxG.play(SoundLibrary.CHARGE);
+		public var shoot:FlxSound = FlxG.play(SoundLibrary.SHOOT);
+		public var match:FlxSound = FlxG.play(SoundLibrary.MATCH);
+		public var fail:FlxSound = FlxG.play(SoundLibrary.FAIL);
+		public var misc:FlxSound = FlxG.play(SoundLibrary.MISC);
+		*/
 		
 		/**
 		 * Has the subpixel been launched?
 		 */
 		private var launched:Boolean = false;
 		private var launchGlow:Boolean = false;
+		
+		//private var lastShotSuccess:Boolean = false;
 		
 		/**
 		 * 
@@ -88,6 +100,10 @@ package
 			grid.spBounds = generateBounds();
 			
 			currentSP = generateNextSubPixel();
+			
+			deck = new Deck(nextColors);
+			add(deck);
+			
 			glow = new FlxSprite(0, 0, SpriteLibrary.GLOW);
 			glow.visible = false;
 		}
@@ -95,18 +111,6 @@ package
 		override public function update():void
 		{
 			super.update();
-			
-			if (FlxG.keys.UP || FlxG.keys.W) launcher.position = Launcher.POSITION_TOP;
-			if (FlxG.keys.RIGHT || FlxG.keys.D) launcher.position = Launcher.POSITION_RIGHT;
-			if (FlxG.keys.DOWN || FlxG.keys.S) launcher.position = Launcher.POSITION_BOTTOM;
-			if (FlxG.keys.LEFT || FlxG.keys.A) launcher.position = Launcher.POSITION_LEFT;
-			
-			/*
-			if (FlxG.mouse.pressed)
-			{
-				launchReady = true;
-			}
-			*/
 			
 			if (!launched)
 			{
@@ -117,6 +121,9 @@ package
 					glow.alpha = 0;
 					add(glow);
 					glow.visible = true;
+					
+					//charge.play();
+					FlxG.play(SoundLibrary.CHARGE);
 				}
 				
 				if (launchGlow)
@@ -138,6 +145,9 @@ package
 					remove(glow);
 					
 					spCollisionRow = getCollisionRow();
+					
+					//shoot.play();
+					FlxG.play(SoundLibrary.SHOOT);
 				}
 				
 				currentSP.x = launcher.loadPosition.x;
@@ -153,7 +163,6 @@ package
 			{
 				animateLaunch();
 			}
-			
 		}
 		
 		private function animateLaunch():void
@@ -192,12 +201,8 @@ package
 		
 		private function checkForMatches():void
 		{
-			// TODO: how the fuck do i check for matches?
-			// check rows? how do i get rows?
-			// use spBounds!?!?!?
-			
-			//var boundsW:uint = (grid.spBounds.width + SubPixel.SUBPIX_W - 1) / SubPixel.SUBPIX_W;
-			//var boundsH:uint = (grid.spBounds.height + SubPixel.PIXEL_SIZE - 1) / SubPixel.PIXEL_SIZE;
+			//var foundMatch:Boolean = false;
+			var foundMatches:uint = 0;
 			
 			trace("--------------");
 			
@@ -237,11 +242,31 @@ package
 								spRow.slice(j - 2, j + 1).forEach(removeFromSPList);
 								if (j < spRow.length - 3)
 								j += 2; // move j ahead so it isnt looking for subpixels we just destroyed
+								
+								//foundMatch = true;
+								foundMatches++;
 							}
 						}
 					}
 				}
 			}
+			
+			//lastShotSuccess = foundMatch;
+			
+			if (foundMatches > 0)
+			{
+				//match.play();
+				FlxG.play(SoundLibrary.MATCH);
+				
+				for (var k:uint = 0; k < foundMatches; k++)
+				{
+					increaseScore(k + 1);
+					multiplier++
+				}
+			}
+			else multiplier = 1;
+			
+			deck.updateDeck(nextColors);
 			
 			launched = false;
 		}
@@ -340,6 +365,11 @@ package
 			{
 				nextColors.push(SubPixel.randomRGB());
 			}
+		}
+		
+		private function increaseScore(Value:uint = 1):void
+		{
+			FlxG.score += Value * multiplier;
 		}
 		
 	}
